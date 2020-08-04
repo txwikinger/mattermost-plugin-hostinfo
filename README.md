@@ -1,6 +1,6 @@
-# Plugin Starter Template [![CircleCI branch](https://img.shields.io/circleci/project/github/mattermost/mattermost-plugin-starter-template/master.svg)](https://circleci.com/gh/mattermost/mattermost-plugin-starter-template)
+# Mattermost Hostinfo Plugin [![CircleCI branch](https://img.shields.io/circleci/project/github/mattermost/mattermost-plugin-hostinfo/master.svg)](https://circleci.com/gh/mattermost/mattermost-plugin-hostinfo)
 
-This plugin serves as a starting point for writing a Mattermost plugin. Feel free to base your own plugin off this repository.
+This plugin has been bases off Mattermost Plugin Starter Template repository.
 
 To learn more about plugins, see [our plugin documentation](https://developers.mattermost.com/extend/plugins/).
 
