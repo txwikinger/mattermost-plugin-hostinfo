@@ -2,43 +2,57 @@ package main
 
 import (
 	"testing"
+	"net/http"
+	"net/http/httptest"
+	"github.com/stretchr/testify/assert"
+	//"gopkg.in/h2non/gock.v1"
 )
 
-// ToDo: Refactor: Better test (not requiring connection to Internet)
+func serverMock() *httptest.Server {
+	handler := http.NewServeMux()
+	handler.HandleFunc("/json/dns.google.com", googleMock)
+ 
+	srv := httptest.NewServer(handler)
+ 
+	return srv
+}
+
+func googleMock(w http.ResponseWriter, r *http.Request) {
+	_, _ = w.Write([]byte(`{
+			"ip":"2001:4860:4860::8888",
+			"country_code":"US",
+			"country_name":"United States",
+			"region_code":"IL",
+			"region_name":"Illinois",
+			"city":"Chicago",
+			"zip_code":"12345",
+			"time_zone":"America/Chicago",
+			"latitude":37.751,
+			"longitude":-97.822,
+			"metro_code":0}`))
+}
+
 func TestGeoIP(t *testing.T) {
+
+	srv := serverMock()
+	defer srv.Close()
+ 
+	assert := assert.New(t)
+
+	c := Consumer{serviceAddress: srv.URL, serviceEndpoint: "/json"}
 
 	host := "dns.google.com"
 
-	result := GeoIP(host)
+	result := c.GeoIP(host)
 
-	if result.Country_code != "US" {
-		t.Errorf("Resulting Country Code was %s instead of %s\n", result.Country_code, "US")
-	}
-	if result.Country_name != "United States" {
-		t.Errorf("Resulting Country Code was %s instead of %s\n", result.Country_name, "United States")
-	}
-	/*
-			if result.Region_code != "" {
-				t.Errorf("Resulting Country Code was %s instead of %s\n", result.Region_code, "")
-			}
-			if result.Region_name != "" {
-				t.Errorf("Resulting Country Code was %s instead of %s\n", result.Region_name, "")
-			}
-			if result.Zip_code != "" {
-				t.Errorf("Resulting Country Code was %s instead of %s\n", result.Zip_code, "")
-			}
-			if result.Time_zone != "America/Chicago" {
-				t.Errorf("Resulting Country Code was %s instead of %s\n", result.Country_code, "America/Chicago")
-			}
-			if !(result.Latitude == 37.751) {
-				t.Errorf("Resulting Country Code was %f instead of %s\n", result.Latitude, "37.751")
-			}
-			if !(result.Longitude == -97.822) {
-				t.Errorf("Resulting Country Code was %f instead of %s\n", result.Longitude, "-97.822")
-			}
-			if !(result.Metro_code == 0) {
-				t.Errorf("Resulting Country Code was %d instead of %s\n", result.Metro_code, "0")
-		       }
-	*/
-
+	assert.Equal("US", result.Country_code)
+	assert.Equal("United States", result.Country_name)
+	assert.Equal("IL", result.Region_code)
+	assert.Equal("Illinois", result.Region_name)
+	assert.Equal("Chicago", result.City)
+	assert.Equal("12345", result.Zip_code)
+	assert.Equal("America/Chicago", result.Time_zone)
+	assert.Equal(37.751, result.Latitude)
+	assert.Equal(-97.822, result.Longitude)
+	assert.Equal(int32(0), result.Metro_code)
 }

@@ -22,23 +22,49 @@ type HostInfo struct {
 	Metro_code   int32
 }
 
-func GeoIP(host string) HostInfo {
+type Consumer struct {
+	serviceAddress string
+	serviceEndpoint string
+}
 
-	url := "https://freegeoip.app/json/" + host
+func GeoIP (host string) *HostInfo {
+	c := Consumer{serviceAddress: "https://freegeoip.app", serviceEndpoint: "/json"}
 
+	return c.GeoIP(host)
+}
+
+func (c Consumer) GeoIP(host string) *HostInfo {
+
+	fmt.Println(c)
+
+	url := c.serviceAddress + c.serviceEndpoint + "/" + host
+
+	fmt. Println(url)
+	
 	// ToDo: Refactor - error handling
-	req, _ := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		// ToDo: log error
+		return nil
+	}
 
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("content-type", "application/json")
 
 	// ToDo: Refactor - error handling
-	res, _ := http.DefaultClient.Do(req)
-
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		// ToDo: log error
+		return nil
+	}
 	defer res.Body.Close()
 
 	// ToDo: Refactor - error handling
-	body, _ := ioutil.ReadAll(res.Body)
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		// ToDo: log error
+		return nil
+	}
 
 	var hostinfo HostInfo
 
@@ -51,5 +77,5 @@ func GeoIP(host string) HostInfo {
 
 	// fmt.Println(res)
 
-	return hostinfo
+	return &hostinfo
 }

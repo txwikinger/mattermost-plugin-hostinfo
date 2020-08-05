@@ -12,6 +12,10 @@ import (
 type Plugin struct {
 	plugin.MattermostPlugin
 
+	// botUserID of the created bot account.
+	botUserID string
+
+
 	// configurationLock synchronizes access to the configuration.
 	configurationLock sync.RWMutex
 
