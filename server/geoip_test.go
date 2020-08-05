@@ -4,8 +4,8 @@ import (
 	"testing"
 	"net/http"
 	"net/http/httptest"
+
 	"github.com/stretchr/testify/assert"
-	//"gopkg.in/h2non/gock.v1"
 )
 
 func serverMock() *httptest.Server {
@@ -19,7 +19,7 @@ func serverMock() *httptest.Server {
 
 func googleMock(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(`{
-			"ip":"2001:4860:4860::8888",
+			"ip":"8.8.8.8",
 			"country_code":"US",
 			"country_name":"United States",
 			"region_code":"IL",
@@ -45,6 +45,7 @@ func TestGeoIP(t *testing.T) {
 
 	result := c.GeoIP(host)
 
+	assert.Equal("8.8.8.8", result.IP)
 	assert.Equal("US", result.Country_code)
 	assert.Equal("United States", result.Country_name)
 	assert.Equal("IL", result.Region_code)

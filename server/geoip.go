@@ -35,6 +35,7 @@ func GeoIP (host string) *HostInfo {
 
 func (c Consumer) GeoIP(host string) *HostInfo {
 
+	// ToDo: Refactor console printouts into log entries
 	fmt.Println(c)
 
 	url := c.serviceAddress + c.serviceEndpoint + "/" + host
