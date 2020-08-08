@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/mattermost/mattermost-server/v5/mlog"
 	"github.com/mattermost/mattermost-server/v5/model"
 	"github.com/mattermost/mattermost-server/v5/plugin"
 )
@@ -37,7 +38,7 @@ func (p *Plugin) postCommandResponse(args *model.CommandArgs, text string, textA
 	}
 	_ = p.API.SendEphemeralPost(args.UserId, post)
 }
-
+/*
 func (p *Plugin) hasSysadminRole(userID string) (bool, error) {
 	user, appErr := p.API.GetUser(userID)
 	if appErr != nil {
@@ -48,7 +49,7 @@ func (p *Plugin) hasSysadminRole(userID string) (bool, error) {
 	}
 	return true, nil
 }
-
+*/
 func (p *Plugin) validateCommand(action string, parameters []string) string {
 	switch action {
 	case commandTriggerShow:
@@ -60,30 +61,20 @@ func (p *Plugin) validateCommand(action string, parameters []string) string {
 	return ""
 }
 
-func (p *Plugin) executeCommandShow(teamName string, args *model.CommandArgs) {
-	found := false
-	/*
-	for _, message := range p.getWelcomeMessages() {
-		if message.TeamName == teamName {
-			if err := p.previewWelcomeMessage(teamName, args, *message); err != nil {
-				p.postCommandResponse(args, "error occurred while processing greeting for team `%s`: `%s`", teamName, err)
-				return
-			}
-
-			found = true
-		}
+func (p *Plugin) executeCommandShow(args *model.CommandArgs) {
+	mlog.Error("Entering executeCommandShow")
+	if err := p.showHostinfoMessage(args); err != nil {
+		p.postCommandResponse(args, "error occurred while processing hostinfo show: `%s`", err)
+		return
 	}
-	*/
-	if !found {
-		p.postCommandResponse(args, "team `%s` has not been found", teamName)
-	}
-	
 }
 
 
 // ExecuteCommand Executes commands from the command list after extraxcting the parameters
 // Todo: improve doc comments
 func (p *Plugin) ExecuteCommand(_ *plugin.Context, args *model.CommandArgs) (*model.CommandResponse, *model.AppError) {
+	mlog.Error("Entering executeCommand")
+	mlog.Error(args.Command)
 	split := strings.Fields(args.Command)
 	command := split[0]
 	parameters := []string{}
@@ -95,19 +86,23 @@ func (p *Plugin) ExecuteCommand(_ *plugin.Context, args *model.CommandArgs) (*mo
 		parameters = split[2:]
 	}
 
-	if command != "/welcomebot" {
+	mlog.Error("Inside executeCommand - before command check command =")
+	mlog.Error(command)
+	if command != "/hostinfo" {
 		return &model.CommandResponse{}, nil
 	}
 
+	mlog.Error("Inside executeCommand - beore validateCommand")
 	if response := p.validateCommand(action, parameters); response != "" {
 		p.postCommandResponse(args, response)
 		return &model.CommandResponse{}, nil
 	}
 
+	mlog.Error("Inside executeCommand - before switch action")
+	
 	switch action {
 	case commandTriggerShow:
-		teamName := parameters[0]
-		p.executeCommandShow(teamName, args)
+		p.executeCommandShow(args)
 		return &model.CommandResponse{}, nil
 	case commandTriggerHelp:
 		fallthrough

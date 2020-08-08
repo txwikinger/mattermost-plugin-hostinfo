@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
+
+	"github.com/mattermost/mattermost-server/v5/model"
 )
 
 type HostInfo struct {
@@ -79,4 +82,39 @@ func (c Consumer) GeoIP(host string) *HostInfo {
 	// fmt.Println(res)
 
 	return &hostinfo
+}
+
+func (p *Plugin) renderHostinfoMessage(hostinfo *HostInfo, host string) *model.Post {
+
+	message := "#### Host information for " + host + "\n"
+
+	//message = message + "|:-----------|:-----------:|"
+	message = message + "**Country Code:** " + hostinfo.Country_code + "\n"
+	message = message + "**Country Name:** " + hostinfo.Country_name + "\n"
+	message = message + "**Region Code:** " + hostinfo.Region_code + "\n"
+	message = message + "**Region Name:** " + hostinfo.Region_name + "\n"
+	message = message + "**City:** " + hostinfo.City + "\n"
+	message = message + "**Zip Code:** " + hostinfo.Zip_code + "\n"
+	message = message + "**Time Zone:** " + hostinfo.Time_zone + "\n"
+	message = message + "**Latitude:** " + fmt.Sprintf("%f",hostinfo.Latitude) + "\n"
+	message = message + "**Longitude:** " + fmt.Sprintf("%f",hostinfo.Longitude) + "\n"
+	message = message + "**Metro Code:** " + fmt.Sprintf("%d",hostinfo.Metro_code) + "\n"
+
+	post := &model.Post{
+		Message: message,
+		UserId:  p.botUserID,
+	}
+
+	return post
+
+}
+
+//func (p *Plugin) showHostinfoMessage(teamName string, args *model.CommandArgs, configMessage ConfigMessage) error {
+func (p *Plugin) showHostinfoMessage(args *model.CommandArgs) error {
+	host := strings.Fields(args.Command)[2]
+	post := p.renderHostinfoMessage(GeoIP(host), host)
+	post.ChannelId = args.ChannelId
+	_ = p.API.SendEphemeralPost(args.UserId, post)
+
+	return nil
 }
