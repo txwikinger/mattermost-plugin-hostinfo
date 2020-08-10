@@ -1,38 +1,20 @@
-# Plugin Starter Template [![CircleCI branch](https://img.shields.io/circleci/project/github/mattermost/mattermost-plugin-starter-template/master.svg)](https://circleci.com/gh/mattermost/mattermost-plugin-starter-template)
+# Mattermost Hostinfo Plugin [![CircleCI branch](https://img.shields.io/circleci/project/github/mattermost/mattermost-plugin-hostinfo/master.svg)](https://circleci.com/gh/mattermost/mattermost-plugin-hostinfo)
 
-This plugin serves as a starting point for writing a Mattermost plugin. Feel free to base your own plugin off this repository.
+This plugin has been based off Mattermost Plugin Starter Template repository.
 
 To learn more about plugins, see [our plugin documentation](https://developers.mattermost.com/extend/plugins/).
 
-## Getting Started
-Use GitHub's template feature to make a copy of this repository by clicking the "Use this template" button.
+## What does it do?
 
-Alternatively shallow clone the repository matching your plugin name:
-```
-git clone --depth 1 https://github.com/mattermost/mattermost-plugin-starter-template com.example.my-plugin
-```
+The hostinfo plugin provides information about a host (via dns domain name or ip address). In its first draft it 
+provides the geoip address, however incremnetal feature enhancements are planned for the future. 
 
-Note that this project uses [Go modules](https://github.com/golang/go/wiki/Modules). Be sure to locate the project outside of `$GOPATH`.
+Mattermost Hostinfobot Plugin - Slash Command Help
 
-Edit `plugin.json` with your `id`, `name`, and `description`:
-```
-{
-    "id": "com.example.my-plugin",
-    "name": "My Plugin",
-    "description": "A plugin to enhance Mattermost."
-}
-```
+    /hostinfo show [ip address] - retrieves and presents information about the given ip address.
+    /hostinfo show [DNS domain] - retrieves and presents information about the given DNS domain.
+    /hostinfo help - shows this help information.
 
-Build your plugin:
-```
-make
-```
-
-This will produce a single plugin file (with support for multiple architectures) for upload to your Mattermost server:
-
-```
-dist/com.example.my-plugin.tar.gz
-```
 
 ## Development
 
