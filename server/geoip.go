@@ -12,17 +12,17 @@ import (
 )
 
 type HostInfo struct {
-	IP           string
-	Country_code string
-	Country_name string
-	Region_code  string
-	Region_name  string
-	City         string
-	Zip_code     string
-	Time_zone    string
-	Latitude     float64
-	Longitude    float64
-	Metro_code   int32
+	IP           string `json:"ip"`
+	CountryCode  string `json:"country_code"`
+	CountryName  string `json:"country_name"`
+	RegionCode   string `json:"region_code"`
+	RegionName   string `json:"region_name"`
+	City         string `json:"city"`
+	ZipCode      string `json:"zip_code"`
+	TimeZone     string `json:"time_zone"`
+	Latitude     float64 `json:"latitude"`
+	Longitude    float64 `json:"longitude"`
+	MetroCode    int32   `json:"metro_code"`
 }
 
 type Consumer struct {
@@ -30,13 +30,13 @@ type Consumer struct {
 	serviceEndpoint string
 }
 
-func GeoIP (host string) *HostInfo {
+func GeoIP (host string) (hostInfo *HostInfo, err error) {
 	c := Consumer{serviceAddress: "https://freegeoip.app", serviceEndpoint: "/json"}
 
 	return c.GeoIP(host)
 }
 
-func (c Consumer) GeoIP(host string) *HostInfo {
+func (c Consumer) GeoIP(host string) (hostInfo *HostInfo, err error) {
 
 	// ToDo: Refactor console printouts into log entries
 	fmt.Println(c)
@@ -49,7 +49,7 @@ func (c Consumer) GeoIP(host string) *HostInfo {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		// ToDo: log error
-		return nil
+		return nil, err
 	}
 
 	req.Header.Add("accept", "application/json")
@@ -59,7 +59,7 @@ func (c Consumer) GeoIP(host string) *HostInfo {
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		// ToDo: log error
-		return nil
+		return nil, err
 	}
 	defer res.Body.Close()
 
@@ -67,7 +67,7 @@ func (c Consumer) GeoIP(host string) *HostInfo {
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		// ToDo: log error
-		return nil
+		return nil, err
 	}
 
 	var hostinfo HostInfo
@@ -81,7 +81,7 @@ func (c Consumer) GeoIP(host string) *HostInfo {
 
 	// fmt.Println(res)
 
-	return &hostinfo
+	return &hostinfo, nil
 }
 
 func (p *Plugin) renderHostinfoMessage(hostinfo *HostInfo, host string) *model.Post {
@@ -89,16 +89,16 @@ func (p *Plugin) renderHostinfoMessage(hostinfo *HostInfo, host string) *model.P
 	message := "#### Host information for " + host + "\n"
 
 	//message = message + "|:-----------|:-----------:|"
-	message = message + "**Country Code:** " + hostinfo.Country_code + "\n"
-	message = message + "**Country Name:** " + hostinfo.Country_name + "\n"
-	message = message + "**Region Code:** " + hostinfo.Region_code + "\n"
-	message = message + "**Region Name:** " + hostinfo.Region_name + "\n"
+	message = message + "**Country Code:** " + hostinfo.CountryCode + "\n"
+	message = message + "**Country Name:** " + hostinfo.CountryName + "\n"
+	message = message + "**Region Code:** " + hostinfo.RegionCode + "\n"
+	message = message + "**Region Name:** " + hostinfo.RegionName + "\n"
 	message = message + "**City:** " + hostinfo.City + "\n"
-	message = message + "**Zip Code:** " + hostinfo.Zip_code + "\n"
-	message = message + "**Time Zone:** " + hostinfo.Time_zone + "\n"
+	message = message + "**Zip Code:** " + hostinfo.ZipCode + "\n"
+	message = message + "**Time Zone:** " + hostinfo.TimeZone + "\n"
 	message = message + "**Latitude:** " + fmt.Sprintf("%f",hostinfo.Latitude) + "\n"
 	message = message + "**Longitude:** " + fmt.Sprintf("%f",hostinfo.Longitude) + "\n"
-	message = message + "**Metro Code:** " + fmt.Sprintf("%d",hostinfo.Metro_code) + "\n"
+	message = message + "**Metro Code:** " + fmt.Sprintf("%d",hostinfo.MetroCode) + "\n"
 
 	post := &model.Post{
 		Message: message,
@@ -112,7 +112,8 @@ func (p *Plugin) renderHostinfoMessage(hostinfo *HostInfo, host string) *model.P
 //func (p *Plugin) showHostinfoMessage(teamName string, args *model.CommandArgs, configMessage ConfigMessage) error {
 func (p *Plugin) showHostinfoMessage(args *model.CommandArgs) error {
 	host := strings.Fields(args.Command)[2]
-	post := p.renderHostinfoMessage(GeoIP(host), host)
+	hostinfo, _ := GeoIP(host)
+	post := p.renderHostinfoMessage(hostinfo, host)
 	post.ChannelId = args.ChannelId
 	_ = p.API.SendEphemeralPost(args.UserId, post)
 

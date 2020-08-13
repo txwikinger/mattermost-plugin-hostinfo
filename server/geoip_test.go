@@ -43,17 +43,18 @@ func TestGeoIP(t *testing.T) {
 
 	host := "dns.google.com"
 
-	result := c.GeoIP(host)
+	result, err := c.GeoIP(host)
 
+	assert.Equal(nil, err)
 	assert.Equal("8.8.8.8", result.IP)
-	assert.Equal("US", result.Country_code)
-	assert.Equal("United States", result.Country_name)
-	assert.Equal("IL", result.Region_code)
-	assert.Equal("Illinois", result.Region_name)
+	assert.Equal("US", result.CountryCode)
+	assert.Equal("United States", result.CountryName)
+	assert.Equal("IL", result.RegionCode)
+	assert.Equal("Illinois", result.RegionName)
 	assert.Equal("Chicago", result.City)
-	assert.Equal("12345", result.Zip_code)
-	assert.Equal("America/Chicago", result.Time_zone)
+	assert.Equal("12345", result.ZipCode)
+	assert.Equal("America/Chicago", result.TimeZone)
 	assert.Equal(37.751, result.Latitude)
 	assert.Equal(-97.822, result.Longitude)
-	assert.Equal(int32(0), result.Metro_code)
+	assert.Equal(int32(0), result.MetroCode)
 }
